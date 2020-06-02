@@ -11,7 +11,9 @@ Write catalog contents to the database
 '''
 
 def check_quality(file_list, bad_threshold=20000):
-
+    bad_file = []
+    bad_exp = []
+    bad_counts = []
     for f in file_list:
         df = pd.read_csv(f)
         exps, counts = np.unique(df.EXPNUM.values, return_counts=True)
@@ -19,9 +21,6 @@ def check_quality(file_list, bad_threshold=20000):
         median = np.median(counts)
         std = np.std(counts)
         print("Median = {}, stddev = {}".format(median, std))
-        bad_file = []
-        bad_exp = []
-        bad_counts = []
         for ind, exp in enumerate(exps):
             if counts[ind] > bad_threshold:
                 print("Possible bad exposure: File = {}, Expnum = {}, count = {}".format(f, exp, counts[ind]))
