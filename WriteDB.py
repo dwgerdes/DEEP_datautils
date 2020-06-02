@@ -28,7 +28,7 @@ def check_quality(file_list, bad_threshold=20000):
                 bad_file.append(f)
                 bad_exp.append(exp)
                 bad_counts.append(counts[ind])
-        return bad_file, bad_exp, bad_counts
+    return bad_file, bad_exp, bad_counts
 
 def writedb(file_list, table, dbname="umtno"):
     conn = ea.connect(section=dbname)
