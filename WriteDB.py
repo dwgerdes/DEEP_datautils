@@ -21,14 +21,22 @@ def check_quality(file_list):
         print("Median = {}, stddev = {}".format(median, std))
         for ind, exp in enumerate(exps):
             if counts[ind] > median + 3*std or counts[ind] < median - 3*std:
-                print(f"Possible bad exposure: File = {f}, Expnum = {exp}, count = {counts[ind]}")
+                print("Possible bad exposure: File = {f}, Expnum = {exp}, count = {counts[ind]}")
 
 def writedb(file_list, table, dbname="umtno"):
     conn = ea.connect(section=dbname)
+    table_exists = False
+    query = "select table_name from user_tables where table_name='{}'".format(table)
+    result = conn.query_to_pandas(query)
+    if (len(result)): table_exists = True
     for f in file_list:
         df = pd.read_csv(f)
         print("Writing {} objects from file {} to database table {}".format(len(df), f, table))
-        conn.load_table(f, name=table)
+        if table_exists:
+            conn.append_table(f, name=table)
+        else:
+            conn.load_table(f, name=table)
+            table_exists = True
 
 def main():
     parser = ap.ArgumentParser(description='Write catalog to database')
@@ -42,7 +50,7 @@ def main():
         raise OSError(rootdir, "does not exist")
     if cat_type == 'diff_se':
         filetype = 'diff_se_CCD*.csv'
-        table = "DIFF_TEST"
+        table = "DIFF_SE_OBJECT"
         file_list = glob.glob(os.path.join(rootdir, filetype))
         writedb(file_list, table)
 #        check_quality(file_list)
