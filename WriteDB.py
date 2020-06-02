@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 Write catalog contents to the database
 '''
 
-def check_quality(file_list):
+def check_quality(file_list, bad_threshold=20000):
 
     for f in file_list:
         df = pd.read_csv(f)
@@ -19,9 +19,16 @@ def check_quality(file_list):
         median = np.median(counts)
         std = np.std(counts)
         print("Median = {}, stddev = {}".format(median, std))
+        bad_file = []
+        bad_exp = []
+        bad_counts = []
         for ind, exp in enumerate(exps):
-            if counts[ind] > median + 3*std or counts[ind] < median - 3*std:
-                print("Possible bad exposure: File = {f}, Expnum = {exp}, count = {counts[ind]}")
+            if counts[ind] > bad_threshold:
+                print("Possible bad exposure: File = {}, Expnum = {}, count = {}".format(f, exp, counts[ind]))
+                bad_file.append(f)
+                bad_exp.append(exp)
+                bad_counts.append(counts[ind])
+        return bad_file, bad_exp, bad_counts
 
 def writedb(file_list, table, dbname="umtno"):
     conn = ea.connect(section=dbname)
@@ -52,8 +59,10 @@ def main():
         filetype = 'diff_se_CCD*.csv'
         table = "DIFF_SE_OBJECT"
         file_list = glob.glob(os.path.join(rootdir, filetype))
-        writedb(file_list, table)
-#        check_quality(file_list)
+#        writedb(file_list, table)
+        bad_file, bad_exps, bad_counts = check_quality(file_list, bad_threshold=0)
+        df = pd.DataFrame({'file':bad_file, 'expnum':bad_exps, 'counts':bad_counts})
+        df.to_csv('counts_by_expnum.csv', index=None)
     else:
         pass
 
