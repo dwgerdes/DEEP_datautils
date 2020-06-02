@@ -1,18 +1,34 @@
 import pandas as pd
 import glob
+import numpy as np
 import easyaccess as ea
 import argparse as ap
 import os
+import matplotlib.pyplot as plt
+
 '''
 Write catalog contents to the database
 '''
 
+def check_quality(file_list):
+
+    for f in file_list:
+        df = pd.read_csv(f)
+        exps, counts = np.unique(df.EXPNUM.values, return_counts=True)
+        print(counts)
+        median = np.median(counts)
+        std = np.std(counts)
+        print("Median = {}, stddev = {}".format(median, std))
+        for ind, exp in enumerate(exps):
+            if counts[ind] > median + 3*std or counts[ind] < median - 3*std:
+                print(f"Possible bad exposure: File = {f}, Expnum = {exp}, count = {counts[ind]}")
+
 def writedb(file_list, table, dbname="umtno"):
     conn = ea.connect(section=dbname)
-    for f in files:
+    for f in file_list:
         df = pd.read_csv(f)
         print("Writing {} objects from file {} to database table {}".format(len(df), f, table))
-        conn.load_table(df, tablename=table)
+#        conn.load_table(df, tablename=table)
 
 def main():
     parser = ap.ArgumentParser(description='Write catalog to database')
@@ -28,7 +44,8 @@ def main():
         filetype = 'diff_se_CCD*.csv'
         table = "DIFF_SE_OBJECT"
         file_list = glob.glob(os.path.join(rootdir, filetype))
-        writedb(file_list, table)
+#        writedb(file_list, table)
+        check_quality(file_list)
     else:
         pass
 
