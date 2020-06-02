@@ -28,7 +28,7 @@ def writedb(file_list, table, dbname="umtno"):
     for f in file_list:
         df = pd.read_csv(f)
         print("Writing {} objects from file {} to database table {}".format(len(df), f, table))
-#        conn.load_table(df, tablename=table)
+        conn.load_table(f, name=table)
 
 def main():
     parser = ap.ArgumentParser(description='Write catalog to database')
@@ -42,10 +42,10 @@ def main():
         raise OSError(rootdir, "does not exist")
     if cat_type == 'diff_se':
         filetype = 'diff_se_CCD*.csv'
-        table = "DIFF_SE_OBJECT"
+        table = "DIFF_TEST"
         file_list = glob.glob(os.path.join(rootdir, filetype))
-#        writedb(file_list, table)
-        check_quality(file_list)
+        writedb(file_list, table)
+#        check_quality(file_list)
     else:
         pass
 
