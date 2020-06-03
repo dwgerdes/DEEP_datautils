@@ -58,7 +58,7 @@ def main():
         filetype = 'diff_se_CCD*.csv'
         table = "DIFF_SE_OBJECT"
         file_list = glob.glob(os.path.join(rootdir, filetype))
-#        writedb(file_list, table)
+        writedb(file_list, table)
         bad_file, bad_exps, bad_counts = check_quality(file_list, bad_threshold=0)
         df = pd.DataFrame({'file':bad_file, 'expnum':bad_exps, 'counts':bad_counts})
         df.to_csv('counts_by_expnum.csv', index=None)
